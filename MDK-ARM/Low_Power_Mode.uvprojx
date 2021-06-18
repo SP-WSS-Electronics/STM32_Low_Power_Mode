@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32L053xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32L0xx_HAL_Driver/Inc;../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32L0xx/Include;../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;  ../Drivers/STM32L0xx_HAL_Driver/Inc;  ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy;  ../Drivers/CMSIS/Device/ST/STM32L0xx/Include;  ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -394,6 +394,16 @@
           <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
+              <FileName>LowPowerMode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\LowPowerMode.c</FilePath>
+            </File>
+            <File>
+              <FileName>LowPowerMode.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\LowPowerMode.h</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -407,16 +417,6 @@
               <FileName>stm32l0xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32l0xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>LowPowerMode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\LowPowerMode.c</FilePath>
-            </File>
-            <File>
-              <FileName>LowPowerMode.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Inc\LowPowerMode.h</FilePath>
             </File>
           </Files>
         </Group>

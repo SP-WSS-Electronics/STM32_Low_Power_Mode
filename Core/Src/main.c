@@ -18,13 +18,13 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
-#include <string.h>
-
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include <stdio.h>
+#include <string.h>
 
 #include "LowPowerMode.h"
 
@@ -62,8 +62,23 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+#define SLEEP_DELAY		3	/* In seconds */
+
+#define SLEEP_MODE 	0
+#define STOP_MODE 	1
+#define STANDY_MODE	2
+
 char uart_tx_buf[200];
 char uart_rx_buf[200];
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == GPIO_PIN_13)
+    {
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+    }
+}
 
 /* USER CODE END 0 */
 
@@ -74,7 +89,8 @@ char uart_rx_buf[200];
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	unsigned char lpmMode = SLEEP_MODE;
+	
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -104,7 +120,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 		char option = ' ';
+		char strLpmMode[20] = "Sleep";
 		
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 		
@@ -118,16 +138,22 @@ int main(void)
 		
 		switch(option)
 		{
+			/* Sleep Mode */
 			case '1':
-				sprintf(uart_tx_buf, "\r\nOption Selected = Sleep Mode");
+				lpmMode = SLEEP_MODE;
+				strcpy(strLpmMode, "Sleep");
 			break;
 			
+			/* Stop Mode */
 			case '2':
-				sprintf(uart_tx_buf, "\r\nOption Selected = Stop Mode");
+				lpmMode = STOP_MODE;
+				strcpy(strLpmMode, "Stop");
 			break;
 
+			/* Standby Mode */
 			case '3':
-				sprintf(uart_tx_buf, "\r\nOption Selected = Standby Mode");
+				lpmMode = STANDY_MODE;
+			strcpy(strLpmMode, "Standby");
 			break;	
 
 			default:
@@ -136,12 +162,22 @@ int main(void)
 			
 		}
 		
-		HAL_UART_Transmit(&huart2, (uint8_t *)uart_tx_buf, strlen(uart_tx_buf), 1000);
+		/* Delay entry into Low Powre Mode */
+		for(int i=0; i< SLEEP_DELAY; i++)
+		{
+			sprintf(uart_tx_buf, "\r\nEntering %s Mode in %d seconds .. ", strLpmMode, SLEEP_DELAY-i);
+			HAL_UART_Transmit(&huart2, (uint8_t *)uart_tx_buf, strlen(uart_tx_buf), 1000);
 			
-		
+			/* Wait for 1 second */
+			HAL_Delay(1000);
+		}
+			
+		/* Enter into target LPM mode */
 		Lpm_Enter_SleepMode();
 		
-		while(1){}
+		sprintf(uart_tx_buf, "\r\nExit LPM");
+		HAL_UART_Transmit(&huart2, (uint8_t *)uart_tx_buf, strlen(uart_tx_buf), 1000);
+				
 		
   }
   /* USER CODE END 3 */
@@ -257,6 +293,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 
