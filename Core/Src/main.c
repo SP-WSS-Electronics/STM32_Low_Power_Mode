@@ -91,6 +91,9 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	unsigned char lpmMode = SLEEP_MODE;
 	
+	void (*lpmEntryFunPtr)(void) = NULL;
+	void (*lpmExitFunPtr)(void) = NULL;
+	
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -114,6 +117,11 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+		char option = ' ';
+		char strLpmMode[20] = "Sleep";
+		
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -123,12 +131,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		char option = ' ';
-		char strLpmMode[20] = "Sleep";
+
 		
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-		
-		sprintf(uart_tx_buf, "\r\nSTM32 Low Power Demo \r\n\r\n1. Enter Sleep Mode \r\n2. Enter Stop Mode \r\n3. Enter Standby Mode");
+		sprintf(uart_tx_buf, "\r\nSTM32 Low Power Demo \r\n\r\n1. Enter Sleep Mode \r\n2. Enter Stop Mode \r\n3. Enter Standby Mode\r\n");
 		
 		HAL_UART_Transmit(&huart2, (uint8_t *)uart_tx_buf, strlen(uart_tx_buf), 1000);
 		
@@ -142,18 +147,27 @@ int main(void)
 			case '1':
 				lpmMode = SLEEP_MODE;
 				strcpy(strLpmMode, "Sleep");
+				
+				lpmEntryFunPtr = Lpm_Enter_SleepMode;
+				lpmExitFunPtr = Lpm_Exit_SleepMode;
 			break;
 			
 			/* Stop Mode */
 			case '2':
 				lpmMode = STOP_MODE;
 				strcpy(strLpmMode, "Stop");
+				
+				lpmEntryFunPtr = Lpm_Enter_StopMode;
+				lpmExitFunPtr = Lpm_Exit_StopMode;
 			break;
 
 			/* Standby Mode */
 			case '3':
 				lpmMode = STANDY_MODE;
-			strcpy(strLpmMode, "Standby");
+				strcpy(strLpmMode, "Standby");
+				
+				lpmEntryFunPtr = Lpm_Enter_StandbyMode;
+				lpmExitFunPtr = Lpm_Exit_StandbyMode;
 			break;	
 
 			default:
@@ -172,10 +186,13 @@ int main(void)
 			HAL_Delay(1000);
 		}
 			
-		/* Enter into target LPM mode */
-		Lpm_Enter_SleepMode();
+		/* Enter into target LPM mode */		
+		(*lpmEntryFunPtr)();
 		
-		sprintf(uart_tx_buf, "\r\nExit LPM");
+		/* Exit from LPM mode*/
+		(*lpmExitFunPtr)();
+		
+		sprintf(uart_tx_buf, "\r\n\r\nExit %s", strLpmMode);
 		HAL_UART_Transmit(&huart2, (uint8_t *)uart_tx_buf, strlen(uart_tx_buf), 1000);
 				
 		
